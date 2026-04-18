@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Knit_Manager_98.exe</title>
+    <style>
+        :root{--win-grey:#c0c0c0;--win-white:#ffffff;--win-dark-grey:#808080;--win-black:#000000;--win-blue:#000080;--win-teal:#008080;}
+        #splash-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;color:white;font-family:"Courier New",Courier,monospace;}
+        .logo-container{width:280px;text-align:center;border:2px solid #555;padding:20px;background:#000;margin-bottom:20px;}
+        .win98-logo{font-size:24px;font-weight:bold;margin-bottom:10px;background:linear-gradient(90deg,#ff0000,#ffff00,#00ff00,#0000ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+        .boot-loader{width:200px;height:15px;border:1px solid #fff;position:relative;overflow:hidden;}
+        .boot-bar{width:40px;height:100%;background:var(--win-blue);position:absolute;animation:moveBar 2s infinite linear;}
+        @keyframes moveBar{0%{left:-40px;}100%{left:200px;}}
+        body{background-color:var(--win-teal);font-family:"Tahoma",sans-serif;margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:10px;box-sizing:border-box;overflow-y:auto;}
+        .container{background:var(--win-grey);width:100%;max-width:480px;padding:4px;border-top:2px solid var(--win-white);border-left:2px solid var(--win-white);border-right:2px solid var(--win-black);border-bottom:2px solid var(--win-black);box-shadow:2px 2px 0 0 var(--win-dark-grey);position:relative;z-index:10;margin-top:20px;margin-bottom:20px;display:none;}
+        .title-bar{background:linear-gradient(90deg,var(--win-blue),#1084d0);padding:3px 3px 3px 10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+        .title-bar-text{color:white;font-weight:bold;font-size:14px;}
+        .close-button{width:16px;height:14px;background-color:var(--win-grey);border-top:1px solid var(--win-white);border-left:1px solid var(--win-white);border-right:1px solid var(--win-black);border-bottom:1px solid var(--win-black);font-size:10px;font-weight:bold;display:flex;justify-content:center;align-items:center;cursor:pointer;padding:0;color:black;}
+        .close-button:active{border-top:1px solid var(--win-black);border-left:1px solid var(--win-black);border-right:1px solid var(--win-white);border-bottom:1px solid var(--win-white);}
+        .btn,.menu-btn{font-family:inherit;background:var(--win-grey);border-top:2px solid var(--win-white);border-left:2px solid var(--win-white);border-right:2px solid var(--win-black);border-bottom:2px solid var(--win-black);padding:15px 10px;cursor:pointer;outline:none;color:black;font-size:18px;font-weight:bold;margin-bottom:5px;}
+        .btn:active{border-top:2px solid var(--win-black);border-left:2px solid var(--win-black);border-right:2px solid var(--win-white);border-bottom:2px solid var(--win-white);background:#d0d0d0;}
+        .size-btn{padding:8px !important;font-size:12px !important;flex:1;}
+        .size-btn.active{color:var(--win-blue);border-top:2px solid var(--win-black);border-left:2px solid var(--win-black);background:#eee;}
+        .card{background:var(--win-white);border-top:2px solid var(--win-dark-grey);border-left:2px solid var(--win-dark-grey);border-right:2px solid var(--win-white);border-bottom:2px solid var(--win-white);padding:12px;margin-bottom:10px;color:black;}
+        #alert-bar{background:#ffffca;border:2px solid var(--win-dark-grey);padding:10px;font-size:13px;font-weight:bold;margin-bottom:10px;display:none;color:#800000;border-style:inset;}
+        .ping{display:inline-block;padding:2px 6px;color:white;font-size:10px;font-weight:bold;text-transform:uppercase;margin-right:5px;}
+        .ping-step{background:var(--win-blue);margin-bottom:5px;}
+        .row-controls{display:flex;flex-direction:column;align-items:center;gap:10px;margin:10px 0;padding:10px 10px 30px 10px;background:rgba(0,0,0,0.05);position:relative;}
+        .row-main{display:flex;justify-content:space-between;align-items:center;width:100%;gap:10px;}
+        .count-btn{font-size:40px !important;width:80px;height:80px;display:flex;justify-content:center;align-items:center;}
+        .reset-rows-btn{font-size:14px !important;padding:5px 15px !important;margin:0 !important;position:absolute;bottom:5px;left:50%;transform:translateX(-50%);}
+        progress{appearance:none;width:100%;height:20px;border:2px solid var(--win-dark-grey);}
+        progress::-webkit-progress-value{background-color:var(--win-blue);}
+        progress::-webkit-progress-bar{background-color:#e0e0e0;}
+        textarea{width:100%;height:50px;font-family:inherit;border:2px solid var(--win-dark-grey);box-sizing:border-box;padding:5px;resize:none;}
+        #menu-screen{display:block;padding:10px;}
+        #tracker-screen{display:none;padding:10px;}
+        .abbrev-footer{margin-top:15px;padding:8px;border-top:1px solid var(--win-dark-grey);font-size:11px;color:#333;line-height:1.4;}
+        .confetti{position:fixed;width:10px;height:10px;z-index:1000;pointer-events:none;top:-10%;}
+        @keyframes fall{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+
+        /* Win98-style custom confirm dialog */
+        #confirm-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:99999;display:none;justify-content:center;align-items:center;}
+        #confirm-box{background:var(--win-grey);border-top:2px solid var(--win-white);border-left:2px solid var(--win-white);border-right:2px solid var(--win-black);border-bottom:2px solid var(--win-black);width:280px;box-shadow:4px 4px 0 0 var(--win-black);}
+        #confirm-title{background:linear-gradient(90deg,var(--win-blue),#1084d0);padding:3px 6px;color:white;font-weight:bold;font-size:13px;}
+        #confirm-body{padding:16px 14px 10px;font-size:13px;color:black;}
+        #confirm-buttons{display:flex;justify-content:center;gap:10px;padding:6px 14px 12px;}
+        .confirm-btn{font-family:inherit;background:var(--win-grey);border-top:2px solid var(--win-white);border-left:2px solid var(--win-white);border-right:2px solid var(--win-black);border-bottom:2px solid var(--win-black);padding:4px 20px;cursor:pointer;font-size:13px;min-width:70px;}
+        .confirm-btn:active{border-top:2px solid var(--win-black);border-left:2px solid var(--win-black);border-right:2px solid var(--win-white);border-bottom:2px solid var(--win-white);}
+    </style>
+</head>
+<body>
+
+<!-- Win98-style confirm dialog (replaces browser confirm() which Android Chrome can block) -->
+<div id="confirm-overlay">
+    <div id="confirm-box">
+        <div id="confirm-title">Knit_Manager_98.exe</div>
+        <div id="confirm-body"></div>
+        <div id="confirm-buttons">
+            <button class="confirm-btn" id="confirm-yes">Yes</button>
+            <button class="confirm-btn" id="confirm-no">No</button>
+        </div>
+    </div>
+</div>
+
+<div id="splash-screen">
+    <div class="logo-container">
+        <div class="win98-logo">Jellifeesh<br>Knit_Manager_98.exe</div>
+        <p style="font-size:10px;">Starting Knit_Manager_98.exe...</p>
+    </div>
+    <div class="boot-loader"><div class="boot-bar"></div></div>
+</div>
+
+<div class="container" id="main-window">
+    <div class="title-bar">
+        <div class="title-bar-text" id="win-title">Knit_Manager_98.exe</div>
+        <button class="close-button" onclick="closeApp()">X</button>
+    </div>
+
+    <div id="menu-screen">
+        <p style="font-size:18px;margin-bottom:20px;">Open Pattern File:</p>
+        <button class="menu-btn" style="width:100%" onclick="startProject('hood')">Hooded Scarf</button>
+        <button class="menu-btn" style="width:100%" onclick="startProject('pointed')">Pointed Scarf</button>
+        <button class="menu-btn" style="width:100%" onclick="startProject('beanie')">Classic Beanie</button>
+        <button class="menu-btn" style="width:100%" onclick="startProject('balaclava')">Ribbed Balaclava</button>
+        <button class="btn" style="width:100%;margin-top:20px;font-size:14px;color:#800000;" onclick="resetAll()">Full Reset</button>
+    </div>
+
+    <div id="tracker-screen">
+        <div style="display:flex;gap:5px;margin-bottom:8px;">
+            <button class="btn size-btn" id="size-0" onclick="setSize(0)">Size S</button>
+            <button class="btn size-btn" id="size-1" onclick="setSize(1)">Size M</button>
+            <button class="btn size-btn" id="size-2" onclick="setSize(2)">Size L</button>
+        </div>
+
+        <div id="alert-bar"></div>
+
+        <div class="card" id="step-card">
+            <div id="step-text" style="min-height:90px;font-size:14px;line-height:1.4;"></div>
+        </div>
+
+        <div id="shaping-area" style="margin-bottom:10px;">
+            <div style="font-size:11px;color:#555;margin-bottom:3px;" id="progress-label"></div>
+            <progress id="shaping-bar" value="0" max="10"></progress>
+            <div style="font-size:11px;color:#555;text-align:right;margin-top:2px;" id="progress-count"></div>
+        </div>
+
+        <div class="row-controls">
+            <div class="row-main">
+                <button class="btn count-btn" onclick="changeRow(-1)">-</button>
+                <div id="row-display" style="font-weight:bold;font-size:42px;color:var(--win-blue);">0</div>
+                <button class="btn count-btn" onclick="changeRow(1)">+</button>
+            </div>
+            <button class="btn reset-rows-btn" onclick="resetCurrentRows()">Reset Rows</button>
+        </div>
+
+        <div style="display:flex;gap:10px;">
+            <button class="btn" style="flex:1" id="prev-btn" onclick="prevStep()">PREV</button>
+            <button class="btn" style="flex:1" id="next-btn" onclick="nextStep()">NEXT</button>
+        </div>
+
+        <div class="card" style="margin-top:10px;padding:6px;">
+            <label style="font-size:11px;font-weight:bold;">Notes:</label>
+            <textarea id="project-notes" oninput="saveNotes()"></textarea>
+        </div>
+    </div>
+
+    <div class="abbrev-footer">
+        <strong>Abbreviations</strong><br>
+        <strong>k:</strong> knit | <strong>k2tog:</strong> knit 2 together | <strong>k1fb:</strong> knit 1 front and back<br>
+        <strong>kfb:</strong> knit front and back | <strong>p:</strong> purl | <strong>YO</strong> yarn over<br>
+        <strong>RS:</strong> right side | <strong>WS:</strong> wrong side | <strong>st(s):</strong> stitch(es)<br>
+        <strong>skp:</strong> slip 1, k1, pass slip stitch over | <strong>wyif:</strong> with yarn in front
+    </div>
+</div>
+
+<script>
+    // ─── CUSTOM CONFIRM ───────────────────────────────────────────────────────────
+    // Android Chrome can suppress window.confirm() inside file:// or PWA contexts.
+    // This Win98-styled dialog works everywhere.
+    function showConfirm(message, onYes, onNo) {
+      const overlay = document.getElementById('confirm-overlay');
+      document.getElementById('confirm-body').innerText = message;
+      overlay.style.display = 'flex';
+      const yes = document.getElementById('confirm-yes');
+      const no  = document.getElementById('confirm-no');
+      const newYes = yes.cloneNode(true);
+      const newNo  = no.cloneNode(true);
+      yes.parentNode.replaceChild(newYes, yes);
+      no.parentNode.replaceChild(newNo,  no);
+      newYes.onclick = () => { overlay.style.display = 'none'; if(onYes) onYes(); };
+      newNo.onclick  = () => { overlay.style.display = 'none'; if(onNo)  onNo();  };
+    }
+
+    // ─── SPLASH ───────────────────────────────────────────────────────────────────
+    window.onload = function() {
+      setTimeout(() => {
+        document.getElementById('splash-screen').style.display = 'none';
+        document.getElementById('main-window').style.display = 'block';
+      }, 3000);
+    };
+
+    // ─── ANDROID BACK BUTTON ─────────────────────────────────────────────────────
+    // Strategy: when we enter a project we push TWO history entries.
+    // The back button pops one; our popstate listener catches it, immediately
+    // re-pushes so the button stays armed, then shows the dialog.
+    // If the user says Yes → go back to menu and call history.go(-2) to consume
+    // the extra states. If No → do nothing (already re-armed).
+
+    function pushProjectHistory() {
+      history.pushState({knit:'base'},    '');
+      history.pushState({knit:'project'}, '');
+    }
+
+    window.addEventListener('popstate', function(e) {
+      if(state.project !== null) {
+        // Re-arm immediately so the back button doesn't slip through on fast taps
+        history.pushState({knit:'project'}, '');
+        showConfirm(
+          'Return to main menu?',
+          function() {  // Yes
+            clearConfetti();
+            state.project = null;
+            renderView();
+            // Consume the 3 history states we pushed (base + project + re-arm)
+            history.go(-3);
+          },
+          null  // No — already re-armed, nothing else to do
+        );
+      }
+    });
+
+    // ─── PATTERNS ────────────────────────────────────────────────────────────────
+    const patterns = {
+
+      hood: {
+        title: "Hooded Scarf",
+        steps: [
+          {
+            text: (s) => `Setup: Cast on 6 sts. K3, wyif slip 3. Repeat for 6 rows total.`,
+            maxRows: () => 6,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              return r%2===1 ? `🧶 ROW ${r} (RS): K3, wyif slip 3.` : `🧶 ROW ${r} (WS): K3, wyif slip 3.`;
+            }
+          },
+          {
+            text: (s) => `Scarf Increases: Work increases on every ${[6,8,10][s]}th row. Repeat until you have 45 sts (approx 240 rows total).`,
+            maxRows: (s) => [240,240,240][s],
+            getPing: (r,s) => {
+              if(r===0) return null;
+              const rate=[6,8,10][s];
+              if((r-1)%rate===0) return `💖 ROW ${r} (WS): INCREASE — k2, kfb, knit to last 3, slip 3.`;
+              const pos=((r-1)%rate)+1;
+              return r%2===0 ? `🧶 ROW ${r} (RS): Knit across. (${pos}/${rate})` : `🧶 ROW ${r} (WS): Knit to last 3, slip 3. (${pos}/${rate})`;
+            }
+          },
+          {
+            text: (s) => `Right Hood Body: Place 3 sts on holder. Work RS: knit, WS: knit to last 3, slip 3 until 16 garter ridges (32 rows) from holder.`,
+            maxRows: () => 33,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              if(r===1) return `🧶 ROW 1 (WS): Place 3 sts on holder. Knit to last 3, slip 3.`;
+              return r%2===0 ? `🧶 ROW ${r} (RS): Knit across.` : `🧶 ROW ${r} (WS): Knit to last 3, slip 3.`;
+            }
+          },
+          {
+            text: (s) => `4-Row Decreases: RS Dec (k2tog at start), WS slip 3, RS knit, WS slip 3. Repeat 3 times (12 rows total).`,
+            maxRows: () => 12,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              const pos=(r-1)%4;
+              if(pos===0) return `⚠️ ROW ${r} (RS): DECREASE — k2tog, knit across.`;
+              if(pos===1) return `🧶 ROW ${r} (WS): Knit to last 3, slip 3.`;
+              if(pos===2) return `🧶 ROW ${r} (RS): Knit across.`;
+              return `🧶 ROW ${r} (WS): Knit to last 3, slip 3.`;
+            }
+          },
+          {
+            text: (s) => `2-Row Decreases: RS Dec (k2tog), WS slip 3. Repeat 6 times (12 rows total).`,
+            maxRows: () => 12,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              return r%2===1 ? `⚠️ ROW ${r} (RS): DECREASE — k2tog, knit across.` : `🧶 ROW ${r} (WS): Knit to last 3, slip 3.`;
+            }
+          },
+          {
+            text: (s) => `Every Row Decreases: RS Dec (k2tog), WS Dec (k1, k2tog, knit, slip 3). Repeat 5 times (10 rows total).`,
+            maxRows: () => 10,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              return r%2===1 ? `⚠️ ROW ${r} (RS): DECREASE — k2tog, knit across.` : `⚠️ ROW ${r} (WS): DECREASE — k1, k2tog, knit to last 3, slip 3.`;
+            }
+          },
+          {
+            text: (s) => `Every Row Increases: RS Inc (kfb), WS Inc (k1, kfb, knit, slip 3). Repeat 5 times (10 rows total).`,
+            maxRows: () => 10,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              return r%2===1 ? `💖 ROW ${r} (RS): INCREASE — kfb, knit across.` : `💖 ROW ${r} (WS): INCREASE — k1, kfb, knit to last 3, slip 3.`;
+            }
+          },
+          {
+            text: (s) => `2-Row Increases: RS Inc (kfb), WS slip 3. Repeat 6 times (12 rows total).`,
+            maxRows: () => 12,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              return r%2===1 ? `💖 ROW ${r} (RS): INCREASE — kfb, knit across.` : `🧶 ROW ${r} (WS): Knit to last 3, slip 3.`;
+            }
+          },
+          {
+            text: (s) => `4-Row Increases: RS knit, WS slip 3, RS Inc (kfb), WS slip 3. Repeat 3 times (12 rows total).`,
+            maxRows: () => 12,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              const pos=(r-1)%4;
+              if(pos===0) return `🧶 ROW ${r} (RS): Knit across.`;
+              if(pos===1) return `🧶 ROW ${r} (WS): Knit to last 3, slip 3.`;
+              if(pos===2) return `💖 ROW ${r} (RS): INCREASE — kfb, knit across.`;
+              return `🧶 ROW ${r} (WS): Knit to last 3, slip 3.`;
+            }
+          },
+          {
+            text: (s) => `Left Hood Body: RS knit, WS slip 3. Repeat 17 times (34 rows total).`,
+            maxRows: () => 34,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              return r%2===1 ? `🧶 ROW ${r} (RS): Knit across.` : `🧶 ROW ${r} (WS): Knit to last 3, slip 3.`;
+            }
+          },
+          {
+            text: (s) => `Rejoin Scarf: Pick up resting sts. Work Rows 2 & 3 for ${[6,8,10][s]} rows.`,
+            maxRows: (s) => [6,8,10][s],
+            getPing: (r,s) => {
+              if(r===0) return null;
+              return r%2===1 ? `🧶 ROW ${r} (RS): Knit across.` : `🧶 ROW ${r} (WS): Knit to last 3, slip 3.`;
+            }
+          },
+          {
+            text: (s) => `Tail Decreases: Decrease (skp on WS) every ${[6,8,10][s]}th row. Repeat until 7 sts remain.`,
+            maxRows: (s) => [240,240,240][s],
+            getPing: (r,s) => {
+              if(r===0) return null;
+              const rate=[6,8,10][s];
+              if((r-1)%rate===0) return `⚠️ ROW ${r} (WS): DECREASE — skp.`;
+              const pos=((r-1)%rate)+1;
+              return r%2===0 ? `🧶 ROW ${r} (RS): Knit across. (${pos}/${rate})` : `🧶 ROW ${r} (WS): Knit to last 3, slip 3. (${pos}/${rate})`;
+            }
+          },
+          {
+            text: (s) => `Final Taper: Work 6 rows, decrease on Row 1. Bind off.`,
+            maxRows: () => 6,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              if(r===1) return `⚠️ ROW 1 (RS): DECREASE — k2tog, knit across.`;
+              if(r===2) return `🧶 ROW 2 (WS): Knit to last 3, slip 3.`;
+              if(r===3) return `🧶 ROW 3 (RS): Knit across.`;
+              if(r===4) return `🧶 ROW 4 (WS): Knit to last 3, slip 3.`;
+              if(r===5) return `🧶 ROW 5 (RS): Knit across.`;
+              if(r===6) return `🏁 ROW 6 (WS): Knit to last 3, slip 3. Then bind off!`;
+              return null;
+            }
+          },
+          {
+            text: (s) => `Finish: Sew the back of the hood using mattress stitch. Weave in all ends.`,
+            maxRows: () => null,
+            getPing: (r,s) => null
+          }
+        ]
+      },
+
+      pointed: {
+        title: "Pointed Scarf",
+        steps: [
+          {
+            text: (s) => `Setup: Cast on 6 sts. K3, wyif slip 3. Repeat for 6 rows total.`,
+            maxRows: () => 6,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              return r%2===1 ? `🧶 ROW ${r} (RS): K3, wyif slip 3.` : `🧶 ROW ${r} (WS): K3, wyif slip 3.`;
+            }
+          },
+          {
+            text: (s) => `Scarf Increases: Work increases on every ${[6,8,10][s]}th row until you have 45 sts.`,
+            maxRows: (s) => [240,240,240][s],
+            getPing: (r,s) => {
+              if(r===0) return null;
+              const rate=[6,8,10][s];
+              if((r-1)%rate===0) return `💖 ROW ${r} (WS): INCREASE — k2, kfb, knit to last 3, slip 3.`;
+              const pos=((r-1)%rate)+1;
+              return r%2===0 ? `🧶 ROW ${r} (RS): Knit across. (${pos}/${rate})` : `🧶 ROW ${r} (WS): Knit to last 3, slip 3. (${pos}/${rate})`;
+            }
+          },
+          {
+            text: (s) => `Scarf Body: RS: knit, WS: knit to last 3, slip 3. Work until ${[80,100,120][s]} cm from cast on.`,
+            maxRows: (s) => [160,200,240][s],
+            getPing: (r,s) => {
+              if(r===0) return null;
+              return r%2===1 ? `🧶 ROW ${r} (RS): Knit across.` : `🧶 ROW ${r} (WS): Knit to last 3, slip 3.`;
+            }
+          },
+          {
+            text: (s) => `Tail Decreases: Decrease (skp on WS) every ${[6,8,10][s]}th row until 7 sts remain.`,
+            maxRows: (s) => [240,240,240][s],
+            getPing: (r,s) => {
+              if(r===0) return null;
+              const rate=[6,8,10][s];
+              if((r-1)%rate===0) return `⚠️ ROW ${r} (WS): DECREASE — skp.`;
+              const pos=((r-1)%rate)+1;
+              return r%2===0 ? `🧶 ROW ${r} (RS): Knit across. (${pos}/${rate})` : `🧶 ROW ${r} (WS): Knit to last 3, slip 3. (${pos}/${rate})`;
+            }
+          },
+          {
+            text: (s) => `Final Taper: Work 6 rows, decrease on Row 1. Bind off.`,
+            maxRows: () => 6,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              if(r===1) return `⚠️ ROW 1 (RS): DECREASE — k2tog, knit across.`;
+              if(r===2) return `🧶 ROW 2 (WS): Knit to last 3, slip 3.`;
+              if(r===3) return `🧶 ROW 3 (RS): Knit across.`;
+              if(r===4) return `🧶 ROW 4 (WS): Knit to last 3, slip 3.`;
+              if(r===5) return `🧶 ROW 5 (RS): Knit across.`;
+              if(r===6) return `🏁 ROW 6 (WS): Knit to last 3, slip 3. Then bind off!`;
+              return null;
+            }
+          },
+          {
+            text: (s) => `Finish: Weave in all ends and block to measurements.`,
+            maxRows: () => null,
+            getPing: (r,s) => null
+          }
+        ]
+      },
+
+      beanie: {
+        title: "Classic Beanie",
+        steps: [
+          {
+            text: (s) => `Cast on ${[72,84,96][s]} stitches. Join in the round, being careful not to twist.`,
+            maxRows: () => null,
+            getPing: (r,s) => null
+          },
+          {
+            text: (s) => `Ribbing: Work K2, P2 rib for approx ${[20,24,24][s]} rounds (${[2,3,3][s]} inches).`,
+            maxRows: (s) => [20,24,24][s],
+            getPing: (r,s) => {
+              if(r===0) return null;
+              return `🧶 ROUND ${r}: K2, P2. Repeat to end of round.`;
+            }
+          },
+          {
+            text: (s) => `Body: Knit every round (stockinette) until piece measures ${[7,8,9][s]} inches from cast on (approx ${[40,50,60][s]} rounds from end of ribbing).`,
+            maxRows: (s) => [40,50,60][s],
+            getPing: (r,s) => {
+              if(r===0) return null;
+              return `🧶 ROUND ${r}: Knit all stitches.`;
+            }
+          },
+          {
+            text: (s) => `Decrease Round 1: *K6, k2tog; repeat from * to end. (${[63,73,84][s]} sts remain)`,
+            maxRows: () => 1,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              if(r===1) return `⚠️ ROUND 1: *K6, k2tog; rep from * to end.`;
+              return null;
+            }
+          },
+          {
+            text: (s) => `Decrease Round 2: Knit all stitches.`,
+            maxRows: () => 1,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              if(r===1) return `🧶 ROUND 1: Knit all stitches.`;
+              return null;
+            }
+          },
+          {
+            text: (s) => `Decrease Round 3: *K5, k2tog; repeat from * to end. (${[54,63,72][s]} sts remain)`,
+            maxRows: () => 1,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              if(r===1) return `⚠️ ROUND 1: *K5, k2tog; rep from * to end.`;
+              return null;
+            }
+          },
+          {
+            text: (s) => `Finish: Continue decreasing every other round (*K4, k2tog*, then *K3, k2tog*, etc.) until ~8 sts remain. Pull yarn through remaining sts and weave in.`,
+            maxRows: () => null,
+            getPing: (r,s) => null
+          }
+        ]
+      },
+
+      balaclava: {
+        title: "Ribbed Balaclava",
+        steps: [
+          {
+            text: (s) => `Cast on ${[80,88,96][s]} stitches. Join in the round, being careful not to twist.`,
+            maxRows: () => null,
+            getPing: (r,s) => null
+          },
+          {
+            text: (s) => `Neck: Work K2, P2 rib for approx 30 rounds (5 inches).`,
+            maxRows: () => 30,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              return `🧶 ROUND ${r}: K2, P2. Repeat to end of round.`;
+            }
+          },
+          {
+            text: (s) => `Face Hole: Bind off ${[16,20,24][s]} sts for the face opening. Work flat for approx 10 rows (2 inches).`,
+            maxRows: () => 10,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              if(r===1) return `⚠️ ROW 1 (RS): Bind off ${[16,20,24][s]} sts, then knit to end.`;
+              return r%2===0 ? `🧶 ROW ${r} (WS): P2, K2 rib to end.` : `🧶 ROW ${r} (RS): K2, P2 rib to end.`;
+            }
+          },
+          {
+            text: (s) => `Re-join: Cast on ${[16,20,24][s]} sts over the face opening gap and join back in the round.`,
+            maxRows: () => 5,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              if(r===1) return `💖 ROUND 1: Cast on ${[16,20,24][s]} sts and join. K2, P2 to end.`;
+              return `🧶 ROUND ${r}: K2, P2. Repeat to end of round.`;
+            }
+          },
+          {
+            text: (s) => `Crown: Work K2, P2 rib for approx 25 rounds (4 inches), then decrease every other round to close the top.`,
+            maxRows: () => 25,
+            getPing: (r,s) => {
+              if(r===0) return null;
+              if(r<=25) return `🧶 ROUND ${r}: K2, P2 rib to end.`;
+              const decRound=r-25;
+              if(decRound%2===1) return `⚠️ DEC ROUND ${decRound}: *K2tog, p2tog; rep from * to end.`;
+              return `🧶 ROUND ${r}: Knit all stitches.`;
+            }
+          }
+        ]
+      }
+    };
+
+    // ─── STATE ───────────────────────────────────────────────────────────────────
+    let state;
+    try {
+      state = JSON.parse(localStorage.getItem('knit98_v9')) || {project:null,step:0,size:0,rowHistory:{},notes:""};
+    } catch(e) {
+      state = {project:null,step:0,size:0,rowHistory:{},notes:""};
+    }
+    function save() { try { localStorage.setItem('knit98_v9', JSON.stringify(state)); } catch(e) {} }
+
+    // ─── APP FUNCTIONS ────────────────────────────────────────────────────────────
+    function closeApp() {
+      if(state.project !== null) {
+        showConfirm('Return to main menu?', function() {
+          clearConfetti(); state.project = null; renderView();
+        }, null);
+      }
+    }
+
+    function setSize(s) { state.size=s; save(); updateDisplay(); }
+
+    function startProject(type) {
+      clearConfetti();
+      state.project = type;
+      state.step = 0;
+      pushProjectHistory();
+      renderView();
+    }
+
+    function resetAll() {
+      showConfirm('Erase all progress?', function() {
+        state={project:null,step:0,size:0,rowHistory:{},notes:""}; save(); renderView();
+      }, null);
+    }
+
+    function changeRow(val) {
+      const key=`${state.project}_${state.step}`;
+      state.rowHistory[key]=Math.max(0,(state.rowHistory[key]||0)+val);
+      save(); updateDisplay();
+    }
+
+    function resetCurrentRows() {
+      showConfirm('Reset row counter for this step?', function() {
+        const key=`${state.project}_${state.step}`; state.rowHistory[key]=0; save(); updateDisplay();
+      }, null);
+    }
+
+    function renderView() {
+      if(state.project) {
+        document.getElementById('menu-screen').style.display='none';
+        document.getElementById('tracker-screen').style.display='block';
+        document.getElementById('project-notes').value=state.notes||"";
+        updateDisplay();
+      } else {
+        document.getElementById('menu-screen').style.display='block';
+        document.getElementById('tracker-screen').style.display='none';
+        document.getElementById('win-title').innerText="Knit_Manager_98.exe";
+      }
+    }
+
+    function saveNotes() { state.notes=document.getElementById('project-notes').value; save(); }
+
+    function nextStep() {
+      const p=patterns[state.project];
+      if(state.step<p.steps.length-1) { clearConfetti(); state.step++; save(); updateDisplay(); window.scrollTo(0,0); }
+    }
+
+    function prevStep() {
+      if(state.step>0) { clearConfetti(); state.step--; save(); updateDisplay(); window.scrollTo(0,0); }
+    }
+
+    function updateDisplay() {
+      const pattern=patterns[state.project];
+      const step=pattern.steps[state.step];
+      const key=`${state.project}_${state.step}`;
+      const rows=state.rowHistory[key]||0;
+      const s=state.size;
+
+      [0,1,2].forEach(i=>document.getElementById(`size-${i}`).classList.toggle('active',s===i));
+      document.getElementById('win-title').innerText=`${pattern.title} - Step ${state.step+1}`;
+      document.getElementById('step-text').innerHTML=`<div class="ping ping-step">STEP ${state.step+1}</div><br>`+step.text(s);
+      document.getElementById('row-display').innerText=rows;
+      document.getElementById('prev-btn').disabled=state.step===0;
+      document.getElementById('next-btn').disabled=state.step===pattern.steps.length-1;
+
+      let maxRows=step.maxRows(s);
+      const shapingArea=document.getElementById('shaping-area');
+      const bar=document.getElementById('shaping-bar');
+      const progLabel=document.getElementById('progress-label');
+      const progCount=document.getElementById('progress-count');
+      if(maxRows) {
+        shapingArea.style.display='block';
+        bar.max=maxRows; bar.value=Math.min(rows,maxRows);
+        progLabel.innerText=`Progress: row ${rows} of ${maxRows}`;
+        progCount.innerText=`${Math.round(Math.min(rows,maxRows)/maxRows*100)}% complete`;
+      } else {
+        shapingArea.style.display='none';
+      }
+
+      const alertBox=document.getElementById('alert-bar');
+      const msg=step.getPing(rows,s);
+      if(msg) { alertBox.innerText=msg; alertBox.style.display='block'; }
+      else { alertBox.innerText=''; alertBox.style.display='none'; }
+
+      if(state.step===pattern.steps.length-1) launchConfetti();
+      else clearConfetti();
+    }
+
+    function clearConfetti() { document.querySelectorAll('.confetti').forEach(c=>c.remove()); }
+
+    function launchConfetti() {
+      if(document.querySelectorAll('.confetti').length>0) return;
+      const colors=['#f06292','#f8bbd0','#ff80ab','#ff4081','#ec407a','#90caf9','#ffffff'];
+      for(let i=0;i<70;i++) {
+        const c=document.createElement('div'); c.className='confetti';
+        c.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)];
+        c.style.left=Math.random()*100+'vw';
+        const dur=(Math.random()*3)+2; const sz=(Math.random()*10)+5;
+        c.style.width=sz+'px'; c.style.height=sz+'px';
+        c.style.animation=`fall ${dur}s linear forwards`;
+        c.style.borderRadius=Math.random()>0.5?'50%':'0%';
+        document.body.appendChild(c);
+        setTimeout(()=>c.remove(),dur*1000);
+      }
+    }
+
+    renderView();
+</script>
+</body>
+</html>
