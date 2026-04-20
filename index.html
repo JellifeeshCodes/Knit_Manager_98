@@ -40,6 +40,17 @@
         .confetti{position:fixed;width:10px;height:10px;z-index:1000;pointer-events:none;top:-10%;}
         @keyframes fall{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(720deg);opacity:0;}}
 
+        /* Gallery styles */
+        #gallery-section{margin-bottom:14px;}
+        #gallery-toggle{width:100%;font-family:inherit;background:var(--win-grey);border-top:2px solid var(--win-white);border-left:2px solid var(--win-white);border-right:2px solid var(--win-black);border-bottom:2px solid var(--win-black);padding:6px 10px;cursor:pointer;outline:none;color:black;font-size:13px;font-weight:bold;text-align:left;display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+        #gallery-toggle:active{border-top:2px solid var(--win-black);border-left:2px solid var(--win-black);border-right:2px solid var(--win-white);border-bottom:2px solid var(--win-white);}
+        #gallery-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+        .gallery-card{background:var(--win-white);border-top:2px solid var(--win-dark-grey);border-left:2px solid var(--win-dark-grey);border-right:2px solid var(--win-white);border-bottom:2px solid var(--win-white);overflow:hidden;cursor:pointer;}
+        .gallery-card:active{border-top:2px solid var(--win-white);border-left:2px solid var(--win-white);border-right:2px solid var(--win-dark-grey);border-bottom:2px solid var(--win-dark-grey);}
+        .gallery-card-titlebar{background:linear-gradient(90deg,var(--win-blue),#1084d0);padding:2px 6px;color:white;font-size:10px;font-weight:bold;}
+        .gallery-card svg{display:block;width:100%;background:#f5f0eb;}
+        .gallery-card-desc{font-size:10px;color:#333;padding:3px 5px 5px;line-height:1.3;}
+
         /* Win98-style custom confirm dialog */
         #confirm-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:99999;display:none;justify-content:center;align-items:center;}
         #confirm-box{background:var(--win-grey);border-top:2px solid var(--win-white);border-left:2px solid var(--win-white);border-right:2px solid var(--win-black);border-bottom:2px solid var(--win-black);width:280px;box-shadow:4px 4px 0 0 var(--win-black);}
@@ -52,7 +63,6 @@
 </head>
 <body>
 
-<!-- Win98-style confirm dialog (replaces browser confirm() which Android Chrome can block) -->
 <div id="confirm-overlay">
     <div id="confirm-box">
         <div id="confirm-title">Knit_Manager_98.exe</div>
@@ -79,7 +89,45 @@
     </div>
 
     <div id="menu-screen">
-        <p style="font-size:18px;margin-bottom:20px;">Open Pattern File:</p>
+
+        <!-- ═══ GALLERY ═══ -->
+        <div id="gallery-section">
+            <button id="gallery-toggle" onclick="toggleGallery()">
+                <span>&#128247; Pattern Gallery</span>
+                <span id="gallery-arrow">&#9660;</span>
+            </button>
+            <div id="gallery-grid">
+
+                <div class="gallery-card" onclick="startProject('hood')">
+                    <div class="gallery-card-titlebar">Hooded Scarf</div>
+                    <img src="/mnt/user-data/uploads/1776683500411_image.png" alt="Hooded Scarf" style="width:100%;height:130px;object-fit:cover;object-position:center top;display:block;"/>
+                    <div class="gallery-card-desc">Scarf with attached knit hood. Tap to open pattern.</div>
+                </div>
+
+                <div class="gallery-card" onclick="startProject('pointed')">
+                    <div class="gallery-card-titlebar">Pointed Scarf</div>
+                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fknittingpattern.org%2Fwp-content%2Fuploads%2F2022%2F10%2FSophie-Scarf-Free-Knitting-Pattern-f3.jpg&f=1&nofb=1&ipt=50c721acd307542066914f9683af60c6e49fa6c9308ee85499a6dbbdec4cc16d" alt="Pointed Scarf" style="width:100%;height:130px;object-fit:cover;object-position:center;display:block;" onerror="this.style.background='#e8d8c8';this.style.height='130px';"/>
+                    <div class="gallery-card-desc">Elegant long scarf tapering to a point. Tap to open.</div>
+                </div>
+
+                <div class="gallery-card" onclick="startProject('beanie')">
+                    <div class="gallery-card-titlebar">Classic Beanie</div>
+                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fnimble-needles.com%2Fwp-content%2Fuploads%2F2020%2F05%2Fcloseup-beanie-knit-1024x768.jpg&f=1&nofb=1&ipt=3806e3f872ea9603c7bf7187e3a208fcfcead7cc2bf09b4071eebf4ae1db1c0e" alt="Classic Beanie" style="width:100%;height:130px;object-fit:cover;object-position:center;display:block;" onerror="this.style.background='#c8d8e8';this.style.height='130px';"/>
+                    <div class="gallery-card-desc">Round beanie with K2P2 rib and a pom-pom. Tap to open.</div>
+                </div>
+
+                <div class="gallery-card" onclick="startProject('balaclava')">
+                    <div class="gallery-card-titlebar">Ribbed Balaclava</div>
+                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcreativeknitstudio.com%2Fwp-content%2Fimages%2FKnitted-Balaclava-Pattern-Free-4481.jpg&f=1&nofb=1&ipt=fbad2c4bc68ccc535f9f8320735ce6a1f0a863178a4ce3b73976e62415fb846b" alt="Ribbed Balaclava" style="width:100%;height:130px;object-fit:cover;object-position:center top;display:block;" onerror="this.style.background='#c8e8d0';this.style.height='130px';"/>
+                    <div class="gallery-card-desc">Cosy full-face balaclava with ribbing. Tap to open.</div>
+                </div>
+
+            </div><!-- /gallery-grid -->
+        </div><!-- /gallery-section -->
+
+        <!-- ═══ DIVIDER ═══ -->
+        <p style="font-size:14px;margin:14px 0 8px;font-weight:bold;">Open Pattern File:</p>
+
         <button class="menu-btn" style="width:100%" onclick="startProject('hood')">Hooded Scarf</button>
         <button class="menu-btn" style="width:100%" onclick="startProject('pointed')">Pointed Scarf</button>
         <button class="menu-btn" style="width:100%" onclick="startProject('beanie')">Classic Beanie</button>
@@ -137,8 +185,6 @@
 
 <script>
     // ─── CUSTOM CONFIRM ───────────────────────────────────────────────────────────
-    // Android Chrome can suppress window.confirm() inside file:// or PWA contexts.
-    // This Win98-styled dialog works everywhere.
     function showConfirm(message, onYes, onNo) {
       const overlay = document.getElementById('confirm-overlay');
       document.getElementById('confirm-body').innerText = message;
@@ -153,6 +199,14 @@
       newNo.onclick  = () => { overlay.style.display = 'none'; if(onNo)  onNo();  };
     }
 
+    // ─── GALLERY TOGGLE ───────────────────────────────────────────────────────────
+    let galleryOpen = true;
+    function toggleGallery() {
+      galleryOpen = !galleryOpen;
+      document.getElementById('gallery-grid').style.display = galleryOpen ? 'grid' : 'none';
+      document.getElementById('gallery-arrow').innerHTML = galleryOpen ? '&#9660;' : '&#9658;';
+    }
+
     // ─── SPLASH ───────────────────────────────────────────────────────────────────
     window.onload = function() {
       setTimeout(() => {
@@ -162,12 +216,6 @@
     };
 
     // ─── ANDROID BACK BUTTON ─────────────────────────────────────────────────────
-    // Strategy: when we enter a project we push TWO history entries.
-    // The back button pops one; our popstate listener catches it, immediately
-    // re-pushes so the button stays armed, then shows the dialog.
-    // If the user says Yes → go back to menu and call history.go(-2) to consume
-    // the extra states. If No → do nothing (already re-armed).
-
     function pushProjectHistory() {
       history.pushState({knit:'base'},    '');
       history.pushState({knit:'project'}, '');
@@ -175,18 +223,16 @@
 
     window.addEventListener('popstate', function(e) {
       if(state.project !== null) {
-        // Re-arm immediately so the back button doesn't slip through on fast taps
         history.pushState({knit:'project'}, '');
         showConfirm(
           'Return to main menu?',
-          function() {  // Yes
+          function() {
             clearConfetti();
             state.project = null;
             renderView();
-            // Consume the 3 history states we pushed (base + project + re-arm)
             history.go(-3);
           },
-          null  // No — already re-armed, nothing else to do
+          null
         );
       }
     });
