@@ -620,13 +620,42 @@ window.onload = function() {
     function save() { try { localStorage.setItem('knit98_v9', JSON.stringify(state)); } catch(e) {} }
 
     // ─── APP FUNCTIONS ────────────────────────────────────────────────────────────
-    function closeApp() {
-      if(state.project !== null) {
-        showConfirm('Return to main menu?', function() {
-          clearConfetti(); state.project = null; renderView();
-        }, null);
-      }
+   function closeApp() {
+
+    // If inside a project, go back to menu
+    if (state.project !== null) {
+
+        showConfirm(
+            'Return to main menu?',
+            function() {
+                clearConfetti();
+                state.project = null;
+                renderView();
+            },
+            null
+        );
+
+    } else {
+
+        // User is already on home screen, log out
+        showConfirm(
+            'Log out and return to login screen?',
+            function() {
+
+                document.getElementById('main-window').style.display = 'none';
+                document.getElementById('login-screen').style.display = 'flex';
+
+                // Clear password field
+                document.getElementById('login-pass').value = '';
+
+                document.getElementById('login-user').focus();
+            },
+            null
+        );
+
     }
+
+}
 
     function setSize(s) { state.size=s; save(); updateDisplay(); }
 
